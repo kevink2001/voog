@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voog — Mõtteprotsesside juhtimine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark: #1A2E4A;
+    --blue-mid: #2B5BA8;
+    --blue-light: #4A90D9;
+    --blue-soft: #EBF3FC;
+    --grey-900: #1C1C1E;
+    --grey-700: #3A3A3C;
+    --grey-500: #636366;
+    --grey-300: #C7C7CC;
+    --grey-100: #F2F2F7;
+    --grey-50: #F8F8FA;
+    --white: #FFFFFF;
+    --accent: #4A90D9;
+    --success: #34C759;
+    --warning: #FF9500;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0D1B2E;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--grey-50);
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 10px #1a1a1a,
+      0 0 0 12px #333,
+      0 40px 80px rgba(0,0,0,0.6),
+      0 0 60px rgba(74,144,217,0.15);
+    flex-shrink: 0;
+  }
+
+  /* Notch */
+  .notch {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 130px; height: 28px;
+    background: #1a1a1a;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+
+  /* Screens */
+  .screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--grey-50);
+    overflow-y: auto;
+    overflow-x: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(30px);
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .screen.slide-back {
+    transform: translateX(-30px);
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--grey-700);
+  }
+  .status-bar.light { color: rgba(255,255,255,0.9); }
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+  .status-icons span { font-size: 11px; }
+
+  /* ===== SPLASH SCREEN ===== */
+  #splash {
+    background: linear-gradient(160deg, #1A2E4A 0%, #2B5BA8 60%, #1a3a6e 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .splash-logo {
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    animation: floatIn 0.8s ease forwards;
+  }
+  .splash-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    color: white;
+    letter-spacing: -1px;
+    animation: floatIn 0.8s 0.1s ease both;
+  }
+  .splash-tagline {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 8px;
+    letter-spacing: 0.02em;
+    animation: floatIn 0.8s 0.2s ease both;
+  }
+  .splash-btn {
+    margin-top: 60px;
+    background: white;
+    color: var(--blue-mid);
+    border: none;
+    border-radius: 50px;
+    padding: 16px 48px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    animation: floatIn 0.8s 0.4s ease both;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .splash-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+  .splash-dots {
+    display: flex; gap: 8px; margin-top: 40px;
+    animation: floatIn 0.8s 0.5s ease both;
+  }
+  .splash-dots span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+  }
+  .splash-dots span:nth-child(2) { background: rgba(255,255,255,0.7); }
+
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HOME SCREEN ===== */
+  #home { background: var(--grey-50); }
+  .home-header {
+    background: linear-gradient(160deg, #1A2E4A, #2B5BA8);
+    padding: 44px 24px 28px;
+    border-radius: 0 0 28px 28px;
+  }
+  .home-greeting {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 4px;
+  }
+  .home-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: white;
+    margin-bottom: 20px;
+  }
+  .home-card {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 18px;
+    padding: 16px 18px;
+    backdrop-filter: blur(10px);
+  }
+  .home-card-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .home-card-q { font-size: 15px; color: white; font-weight: 500; line-height: 1.4; margin-bottom: 12px; }
+  .home-card-btns { display: flex; gap: 8px; }
+  .home-card-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .home-card-btn:hover { transform: scale(0.97); }
+  .home-card-btn.primary { background: white; color: var(--blue-mid); }
+  .home-card-btn.secondary { background: rgba(255,255,255,0.15); color: white; }
+
+  .home-body { padding: 20px 20px 100px; }
+  .section-title { font-size: 18px; font-weight: 600; color: var(--grey-900); margin-bottom: 14px; }
+
+  .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .quick-card {
+    background: white;
+    border-radius: 18px;
+    padding: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .quick-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .quick-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  .quick-card h3 { font-size: 13px; font-weight: 600; color: var(--grey-900); margin-bottom: 3px; }
+  .quick-card p { font-size: 11px; color: var(--grey-500); line-height: 1.4; }
+
+  .tip-card {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+  }
+  .tip-card:hover { transform: translateX(4px); }
+  .tip-num {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--blue-soft);
+    color: var(--blue-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .tip-card h4 { font-size: 14px; font-weight: 600; color: var(--grey-900); margin-bottom: 3px; }
+  .tip-card p { font-size: 12px; color: var(--grey-500); line-height: 1.4; }
+  .tip-arrow { margin-left: auto; color: var(--grey-300); font-size: 18px; align-self: center; }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav { display: none; }
+  #global-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: rgba(248,248,250,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 0.5px solid var(--grey-300);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 10px 16px;
+    z-index: 200;
+    border-radius: 0 0 40px 40px;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px; cursor: pointer; padding: 8px 16px;
+    border-radius: 12px;
+    transition: background 0.2s;
+  }
+  .nav-item:hover { background: var(--grey-100); }
+  .nav-icon { font-size: 22px; line-height: 1; }
+  .nav-label { font-size: 10px; color: var(--grey-500); font-weight: 500; }
+  .nav-item.active .nav-label { color: var(--blue-mid); }
+  .nav-item.active .nav-icon { filter: none; }
+
+  /* ===== MEETODID SCREEN ===== */
+  #meetodid { background: var(--grey-50); }
+  .screen-header {
+    padding: 44px 20px 16px;
+    background: white;
+    border-bottom: 0.5px solid var(--grey-100);
+  }
+  .screen-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--grey-900); }
+  .screen-header p { font-size: 13px; color: var(--grey-500); margin-top: 4px; }
+
+  .filter-row {
+    display: flex; gap: 8px; padding: 14px 20px;
+    overflow-x: auto; scrollbar-width: none;
+    background: white;
+    border-bottom: 0.5px solid var(--grey-100);
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--grey-200, #e5e5ea);
+    background: white;
+    font-size: 12px; font-weight: 500;
+    color: var(--grey-500);
+    cursor: pointer; white-space: nowrap;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-pill.active { background: var(--blue-mid); color: white; border-color: var(--blue-mid); }
+
+  .meetodid-list { padding: 16px 20px 100px; display: flex; flex-direction: column; gap: 12px; }
+  .meetod-card {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid transparent;
+  }
+  .meetod-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .meetod-card.orange { border-left-color: #FF9500; }
+  .meetod-card.blue { border-left-color: var(--blue-mid); }
+  .meetod-card.green { border-left-color: var(--success); }
+  .meetod-card.pink { border-left-color: #FF375F; }
+  .meetod-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .meetod-emoji { font-size: 24px; }
+  .meetod-top h3 { font-size: 15px; font-weight: 600; color: var(--grey-900); }
+  .meetod-top .badge { margin-left: auto; font-size: 10px; padding: 3px 8px; border-radius: 8px; font-weight: 600; }
+  .badge-orange { background: #FFF3E0; color: #E65100; }
+  .badge-blue { background: var(--blue-soft); color: var(--blue-dark); }
+  .badge-green { background: #E8F5E9; color: #1B5E20; }
+  .badge-pink { background: #FFE4E8; color: #C0392B; }
+  .meetod-card p { font-size: 13px; color: var(--grey-500); line-height: 1.5; }
+  .meetod-tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .meetod-tag { font-size: 11px; padding: 3px 10px; border-radius: 8px; background: var(--grey-100); color: var(--grey-700); }
+
+  /* ===== TÖÖRIISTAD SCREEN ===== */
+  #tooriistad { background: var(--grey-50); }
+  .tool-section { padding: 20px 20px 0; }
+  .tool-section-title { font-size: 13px; font-weight: 600; color: var(--grey-500); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .tool-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .tool-item {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.2s;
+  }
+  .tool-item:hover { transform: translateX(4px); }
+  .tool-logo {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .tool-info { flex: 1; }
+  .tool-info h4 { font-size: 14px; font-weight: 600; color: var(--grey-900); margin-bottom: 2px; }
+  .tool-info p { font-size: 12px; color: var(--grey-500); }
+  .tool-arrow { color: var(--grey-300); font-size: 16px; }
+
+  /* ===== MINA SCREEN ===== */
+  #mina { background: var(--grey-50); }
+  .profile-header {
+    background: linear-gradient(160deg, #1A2E4A, #2B5BA8);
+    padding: 50px 24px 28px;
+    border-radius: 0 0 28px 28px;
+    text-align: center;
+    color: white;
+  }
+  .avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 12px;
+  }
+  .profile-name { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
+  .profile-sub { font-size: 13px; opacity: 0.65; }
+  .stats-row { display: flex; justify-content: space-around; margin-top: 20px; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 11px; opacity: 0.65; }
+  .profile-body { padding: 20px 20px 100px; }
+  .profile-section { background: white; border-radius: 18px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .profile-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 0.5px solid var(--grey-100);
+    cursor: pointer;
+  }
+  .profile-row:last-child { border-bottom: none; }
+  .profile-row-icon { font-size: 20px; width: 36px; height: 36px; background: var(--grey-100); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .profile-row span { font-size: 14px; color: var(--grey-900); font-weight: 500; }
+  .profile-row .arrow { margin-left: auto; color: var(--grey-300); }
+
+  /* ===== DETAIL SCREEN ===== */
+  #detail { background: var(--grey-50); }
+  .detail-back {
+    position: absolute;
+    top: 44px; left: 20px;
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; color: white;
+    z-index: 10;
+    border: none;
+    backdrop-filter: blur(10px);
+  }
+  .detail-hero {
+    background: linear-gradient(160deg, #1A2E4A, #2B5BA8);
+    padding: 90px 24px 32px;
+    border-radius: 0 0 28px 28px;
+  }
+  .detail-tag { display: inline-block; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 10px; font-size: 11px; color: rgba(255,255,255,0.8); margin-bottom: 12px; }
+  .detail-title { font-family: 'DM Serif Display', serif; font-size: 30px; color: white; margin-bottom: 8px; line-height: 1.2; }
+  .detail-sub { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .detail-body { padding: 20px 20px 100px; }
+  .detail-section { background: white; border-radius: 18px; padding: 18px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .detail-section h3 { font-size: 15px; font-weight: 600; color: var(--grey-900); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .detail-section p { font-size: 13px; color: var(--grey-500); line-height: 1.6; }
+  .step-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .step-item { display: flex; gap: 12px; align-items: flex-start; }
+  .step-dot { width: 24px; height: 24px; border-radius: 50%; background: var(--blue-soft); color: var(--blue-mid); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-item p { font-size: 13px; color: var(--grey-700); line-height: 1.5; }
+  .try-btn { width: 100%; padding: 16px; background: var(--blue-mid); color: white; border: none; border-radius: 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: transform 0.15s, box-shadow 0.15s; }
+  .try-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(43,91,168,0.35); }
+
+  /* Timer in detail */
+  .timer-box { background: var(--blue-soft); border-radius: 14px; padding: 20px; text-align: center; margin: 4px 0; }
+  .timer-display { font-family: 'DM Serif Display', serif; font-size: 48px; color: var(--blue-dark); letter-spacing: 2px; }
+  .timer-label { font-size: 12px; color: var(--grey-500); margin-top: 4px; }
+  .timer-controls { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+  .timer-btn { padding: 10px 24px; border-radius: 12px; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 0.15s; }
+  .timer-btn:hover { transform: scale(0.96); }
+  .timer-btn.start { background: var(--blue-mid); color: white; }
+  .timer-btn.reset { background: white; color: var(--grey-700); }
+
+  /* Scrollbar hide */
+  .screen::-webkit-scrollbar { display: none; }
+  .screen { scrollbar-width: none; }
+
+  /* Info below phone */
+  .phone-info {
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .phone-info strong { color: rgba(255,255,255,0.8); }
+
+  .wrapper { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+<div class="phone">
+  <div class="notch"></div>
+
+  <!-- SPLASH -->
+  <div class="screen active" id="splash">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;">
+      <div class="splash-logo">🌊</div>
+      <div class="splash-name">Voog</div>
+      <div class="splash-tagline">Mõtteprotsesside juhtimine</div>
+      <button class="splash-btn" onclick="goTo('home')">Alusta →</button>
+      <div class="splash-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen" id="home">
+    <div class="home-header">
+      <div class="status-bar light" style="padding:14px 4px 0;">
+        <span>9:41</span>
+        <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+      </div>
+      <div class="home-greeting">Tere tulemast 👋</div>
+      <div class="home-title">Kust täna alustada?</div>
+      <div class="home-card">
+        <div class="home-card-label">Küsimus sulle</div>
+        <div class="home-card-q">"Kas oled kinni jäänud ega tea, mida edasi teha?"</div>
+        <div class="home-card-btns">
+          <button class="home-card-btn primary" onclick="goTo('meetodid')">Leia lahendus</button>
+          <button class="home-card-btn secondary" onclick="goTo('detail')">Pomodoro</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-body">
+      <div class="section-title">Kiired meetodid</div>
+      <div class="quick-grid">
+        <div class="quick-card" onclick="goTo('detail')">
+          <div class="quick-icon" style="background:#FFF3E0;">⏱️</div>
+          <h3>Pomodoro</h3>
+          <p>25 min töö, 5 min paus</p>
+        </div>
+        <div class="quick-card" onclick="goTo('meetodid')">
+          <div class="quick-icon" style="background:#E8F5E9;">⚡</div>
+          <h3>2 min reegel</h3>
+          <p>Tee kohe ära</p>
+        </div>
+        <div class="quick-card" onclick="goTo('meetodid')">
+          <div class="quick-icon" style="background:var(--blue-soft);">🧠</div>
+          <h3>Brain dump</h3>
+          <p>Tühjenda pea paberile</p>
+        </div>
+        <div class="quick-card" onclick="goTo('meetodid')">
+          <div class="quick-icon" style="background:#FFE4E8;">📓</div>
+          <h3>Progressi päevik</h3>
+          <p>2–3 lauset päevas</p>
+        </div>
+      </div>
+
+      <div class="section-title">Üldised põhimõtted</div>
+      <div class="tip-card" onclick="goTo('pohimotted')">
+        <div class="tip-num">🧠</div>
+        <div>
+          <h4>Vaimne pool</h4>
+          <p>Eneseteadlikkus, energiajuhtimine ja keskkond — tunne oma tööstili.</p>
+        </div>
+        <div class="tip-arrow">›</div>
+      </div>
+      <div class="tip-card" onclick="goTo('pohimotted')">
+        <div class="tip-num">⚙️</div>
+        <div>
+          <h4>Praktiline pool</h4>
+          <p>Prioritiseeri, ajaplaneeri ja pane ülesanded kirja — aitab kõike meeles pidada.</p>
+        </div>
+        <div class="tip-arrow">›</div>
+      </div>
+      <div class="tip-card" onclick="goTo('takistused')">
+        <div class="tip-num">🚧</div>
+        <div>
+          <h4>Takistused ja lahendused</h4>
+          <p>Prokrastineerimine, perfektsionism, motivatsioonipuudus — vaata lahendusi.</p>
+        </div>
+        <div class="tip-arrow">›</div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="goTo('home')"><span class="nav-icon">🏠</span><span class="nav-label">Avaleht</span></div>
+      <div class="nav-item" onclick="goTo('meetodid')"><span class="nav-icon">📋</span><span class="nav-label">Meetodid</span></div>
+      <div class="nav-item" onclick="goTo('tooriistad')"><span class="nav-icon">🔧</span><span class="nav-label">Tööriistad</span></div>
+      <div class="nav-item" onclick="goTo('pohimotted')"><span class="nav-icon">💡</span><span class="nav-label">Põhimõtted</span></div>
+    </div>
+  </div>
+
+  <!-- MEETODID -->
+  <div class="screen" id="meetodid">
+    <div class="screen-header" style="padding-top:50px;">
+      <h1>Meetodid</h1>
+      <p>Mõtteprotsesside juhtimine — sammhaaval</p>
+    </div>
+    <div class="filter-row">
+      <button class="filter-pill active">Kõik</button>
+      <button class="filter-pill">Alustamine</button>
+      <button class="filter-pill">Jätkamine</button>
+      <button class="filter-pill">Lõpetamine</button>
+    </div>
+    <div class="meetodid-list">
+
+      <!-- ALUSTAMINE -->
+      <div style="font-size:11px;font-weight:600;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.06em;padding:4px 0 2px;">Kuidas projektiga alustada?</div>
+
+      <div class="meetod-card orange" onclick="goTo('detail')">
+        <div class="meetod-top">
+          <span class="meetod-emoji">⚡</span>
+          <h3>2 minuti reegel</h3>
+          <span class="badge badge-orange">Alustamine</span>
+        </div>
+        <p>Kui ülesanne võtab alla 2 minuti, tee see kohe ära. Kui võtab kauem — alusta ainult 2-minutise versiooniga. Kirjuta esimene lause. Ava fail. Joonista esimene joon. Eesmärk ei ole lõpetada, vaid käivitada.</p>
+        <div class="meetod-tags"><span class="meetod-tag">Kiire algus</span><span class="meetod-tag">Prokrastineerimine</span></div>
+      </div>
+
+      <div class="meetod-card orange">
+        <div class="meetod-top">
+          <span class="meetod-emoji">🧠</span>
+          <h3>Aju eelsoojendus</h3>
+          <span class="badge badge-orange">Alustamine</span>
+        </div>
+        <p>Enne peamise ülesandega alustamist tee 10–15 minutit midagi, mis on sellega seotud aga vähem hirmutav: loe artikleid, vaata inspiratsiooni, kuula bengut, tee vaba joonistus. See lülitab aju vajalisse mõtterežiimi ilma survestamata.</p>
+        <div class="meetod-tags"><span class="meetod-tag">Fookus</span><span class="meetod-tag">Inspiratsioon</span></div>
+      </div>
+
+      <div class="meetod-card orange">
+        <div class="meetod-top">
+          <span class="meetod-emoji">🏠</span>
+          <h3>Vaheta keskkonda</h3>
+          <span class="badge badge-orange">Alustamine</span>
+        </div>
+        <p>Aju seob kohti ja tegevusi — magamistuba seostub une ja puhkusega, mitte tööga. Tee tööd kohvikus, raamatukogus, välisõhus või lihtsalt teises toas. Uus koht annab vaimsele uue alguse ilma, et peaksid tahtetuju kasutama.</p>
+        <div class="meetod-tags"><span class="meetod-tag">Keskkond</span><span class="meetod-tag">Energia</span></div>
+      </div>
+
+      <!-- JÄTKAMINE -->
+      <div style="font-size:11px;font-weight:600;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.06em;padding:12px 0 2px;">Kuidas projektiga jätkata?</div>
+
+      <div class="meetod-card blue" onclick="goTo('detail')">
+        <div class="meetod-top">
+          <span class="meetod-emoji">⏱️</span>
+          <h3>Pomodoro tehnika</h3>
+          <span class="badge badge-blue">Jätkamine</span>
+        </div>
+        <p>25 minutit täielikku fookust, siis 5 minutit pausi. Iga 4 tsükli järel 15–30 minutit pikk paus. Telefon kinni, teavitused välja, üks ülesanne. Paus ligu, ära jää ekraani ette.</p>
+        <div class="meetod-tags"><span class="meetod-tag">25 min</span><span class="meetod-tag">Produktiivsus</span></div>
+      </div>
+
+      <div class="meetod-card blue">
+        <div class="meetod-top">
+          <span class="meetod-emoji">📓</span>
+          <h3>Progressi päevik</h3>
+          <span class="badge badge-blue">Jätkamine</span>
+        </div>
+        <p>Iga tööpäeva lõpus kirjuta vaid 2–3 lauset: mis töötas, mis ei töötanud, mida teen homme alused. Keskendu tehtule, mitte tegemata jäänule. Uuringud näitavad, et progressi tajumine on üks tugevamatest sisemise motivatsiooni allikaist.</p>
+        <div class="meetod-tags"><span class="meetod-tag">Igapäevane</span><span class="meetod-tag">Refleksioon</span></div>
+      </div>
+
+      <div class="meetod-card blue">
+        <div class="meetod-top">
+          <span class="meetod-emoji">🔄</span>
+          <h3>Muuda tööreziimi</h3>
+          <span class="badge badge-blue">Jätkamine</span>
+        </div>
+        <p>Kui kirjutamine ei edene, joonista; kui joonistamine ei edene, selgita ideed suuliselt, häälesvesta ennast. Kui digitaalne ei tööta, tee käsitsi. Probleemi erineval mood lähenemine avab uusi lahendusi, mida samas rutiinis ei näeks.</p>
+        <div class="meetod-tags"><span class="meetod-tag">Loovus</span><span class="meetod-tag">Creative block</span></div>
+      </div>
+
+      <!-- LÕPETAMINE -->
+      <div style="font-size:11px;font-weight:600;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.06em;padding:12px 0 2px;">Kuidas projekte lõpuni viia?</div>
+
+      <div class="meetod-card green">
+        <div class="meetod-top">
+          <span class="meetod-emoji">🔍</span>
+          <h3>Mini retrospektiiv</h3>
+          <span class="badge badge-green">Lõpetamine</span>
+        </div>
+        <p>Pärast projekti lõpetamist võta 20 minutit ja vasta kolmele küsimusele: mis töötas hästi? mis ei töötanud? mida teen järgmises projektis teisti? See muudab kogemuse teadmiseks, mida saad edasi kanda.</p>
+        <div class="meetod-tags"><span class="meetod-tag">Refleksioon</span><span class="meetod-tag">Areng</span></div>
+      </div>
+
+      <div class="meetod-card green">
+        <div class="meetod-top">
+          <span class="meetod-emoji">🏆</span>
+          <h3>Tähistamise rituaal</h3>
+          <span class="badge badge-green">Lõpetamine</span>
+        </div>
+        <p>Otsusta ette, mida teed kui projekt on valmis — käiksõ kohv lemmikkohvikus, õhtusöök sõpradega, ühe päev paus. Tähistamise rituaal muudab lõpetamise sündmuseks, mille poole liikuda, mitte ainult kohustuse täitmiseks.</p>
+        <div class="meetod-tags"><span class="meetod-tag">Motivatsioon</span><span class="meetod-tag">Lõpetamine</span></div>
+      </div>
+
+      <div class="meetod-card pink">
+        <div class="meetod-top">
+          <span class="meetod-emoji">😤</span>
+          <h3>Perfektsionism tapab</h3>
+          <span class="badge badge-pink">Lõpetamine</span>
+        </div>
+        <p>Täiuslikkus on lõpetamise vaenlane number üks. "Hea piisab" ei tähenda madalat kvaliteeti — see tähendab, et tehtud töö on alati parem kui tegemata täiulik töö. Pane endale valmimise tähtaeg ja peatu seal, mitte siis, kui on "täiuslik".</p>
+        <div class="meetod-tags"><span class="meetod-tag">Mõtteviis</span><span class="meetod-tag">Areng üle perfektsuse</span></div>
+      </div>
+
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span><span class="nav-label">Avaleht</span></div>
+      <div class="nav-item active" onclick="goTo('meetodid')"><span class="nav-icon">📋</span><span class="nav-label">Meetodid</span></div>
+      <div class="nav-item" onclick="goTo('tooriistad')"><span class="nav-icon">🔧</span><span class="nav-label">Tööriistad</span></div>
+      <div class="nav-item" onclick="goTo('pohimotted')"><span class="nav-icon">💡</span><span class="nav-label">Põhimõtted</span></div>
+    </div>
+  </div>
+
+  <!-- TÖÖRIISTAD -->
+  <div class="screen" id="tooriistad">
+    <div class="screen-header" style="padding-top:50px;">
+      <h1>Tööriistad</h1>
+      <p>Äpid ja programmid, mis aitavad sul projekti alustada ja ellu viia</p>
+    </div>
+    <div style="padding: 16px 20px 100px;">
+      <div class="tool-section-title" style="padding:0;margin-bottom:10px;margin-top:4px;">Efektiivsuse parandamine</div>
+      <div class="tool-list">
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#FF6B35;color:white;">💡</div>
+          <div class="tool-info"><h4>Brain Dump</h4><p>Kirjuta kõik peast välja, pea tühjaks ja siis alusta</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#4A90D9;color:white;">🗺️</div>
+          <div class="tool-info"><h4>Mind Maping</h4><p>Joonista mõtted visuaalselt välja — paber, ipad, kasva senile</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#34C759;color:white;">📵</div>
+          <div class="tool-info"><h4>Digitaalne Detox</h4><p>Toda 25 min puhta 5 min — keela fookuse fenra. Au on töötlik task, aia mingitama köige köige ja liigu puhta</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#FF9500;color:white;">📊</div>
+          <div class="tool-info"><h4>80:20 reegel</h4><p>Keskendu 20% ülesannetest, mis toovad 80% tulemustest või mõjust</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="tool-section-title" style="padding:0;margin-bottom:10px;">Äppid, mis sind aitavad</div>
+      <div class="tool-list">
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#000;color:white;">N</div>
+          <div class="tool-info"><h4>Notion</h4><p>Märkmed, projektid, todo-lehed</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#DB4035;color:white;">✓</div>
+          <div class="tool-info"><h4>Todoist</h4><p>Ülesannete haldamine</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#7C3AED;color:white;">O</div>
+          <div class="tool-info"><h4>Obsidian</h4><p>Sinu aju andmebaas, mõtete sidumine</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:linear-gradient(135deg,#FF6B6B,#FFE66D);color:white;">AI</div>
+          <div class="tool-info"><h4>ChatGPT</h4><p>AI abi — ideede genereerimine, küsimustele vastamine</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#4ABFB5;color:white;">🧘</div>
+          <div class="tool-info"><h4>Calm</h4><p>Meditatsioon, stressi vähendamine, parem uni</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="tool-section-title" style="padding:0;margin-bottom:10px;">Programmid arvutis</div>
+      <div class="tool-list">
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#1F75C4;color:white;">M</div>
+          <div class="tool-info"><h4>Miro</h4><p>Digitaalne tahvel — märkmed, mind mapid ja koostöö tiimiga</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#0052CC;color:white;">T</div>
+          <div class="tool-info"><h4>Trello</h4><p>Tähtajapõhine ülesannete haldur — hea projektide ja töövoo jälgimiseks</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#7B68EE;color:white;">W</div>
+          <div class="tool-info"><h4>Workflowy</h4><p>Ühtne loendipõhine tööriist — sobib inimestele, kes tahavad selget struktuuri</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#4285F4;color:white;">📅</div>
+          <div class="tool-info"><h4>Google Calendar</h4><p>Kalender ja ajaplaneerimise tööriist — reserveeri aeg konkreetsetele ülesannetele</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+        <div class="tool-item">
+          <div class="tool-logo" style="background:#2ECC71;color:white;">F</div>
+          <div class="tool-info"><h4>Flow</h4><p>Elegantne ülesannete ja projektide haldamise programm — keskendumisvõime toetamiseks</p></div>
+          <span class="tool-arrow">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span><span class="nav-label">Avaleht</span></div>
+      <div class="nav-item" onclick="goTo('meetodid')"><span class="nav-icon">📋</span><span class="nav-label">Meetodid</span></div>
+      <div class="nav-item active" onclick="goTo('tooriistad')"><span class="nav-icon">🔧</span><span class="nav-label">Tööriistad</span></div>
+      <div class="nav-item" onclick="goTo('pohimotted')"><span class="nav-icon">💡</span><span class="nav-label">Põhimõtted</span></div>
+    </div>
+  </div>
+
+  <!-- PÕHIMÕTTED -->
+  <div class="screen" id="pohimotted">
+    <div class="screen-header" style="padding-top:50px;">
+      <h1>Põhimõtted</h1>
+      <p>Üldised põhimõtted ja takistuste lahendused</p>
+    </div>
+    <div style="padding: 16px 20px 100px;">
+
+      <div class="tool-section-title" style="padding:0;margin-bottom:10px;">Üldised põhimõtted</div>
+
+      <div class="detail-section" style="margin-bottom:12px;">
+        <h3>🧠 Vaimne pool</h3>
+        <ul class="step-list" style="margin-top:8px;">
+          <li class="step-item"><div class="step-dot">1</div><p>Eneseteadlikkus — tunne oma tööstili</p></li>
+          <li class="step-item"><div class="step-dot">2</div><p>Energiajuhtimine — tee raskemaid ülesandeid siis, kui energiat kõige rohkem on</p></li>
+          <li class="step-item"><div class="step-dot">3</div><p>Keskkond — loo endale keskkond, kus töötamine on mõnusam</p></li>
+        </ul>
+      </div>
+
+      <div class="detail-section" style="margin-bottom:12px;">
+        <h3>⚙️ Praktiline pool</h3>
+        <ul class="step-list" style="margin-top:8px;">
+          <li class="step-item"><div class="step-dot">1</div><p>Prioritiseerimine — tee enne kõige olulisem</p></li>
+          <li class="step-item"><div class="step-dot">2</div><p>Ajaplaneerimine — broneeri endale aeg konkreetse ülesande jaoks</p></li>
+          <li class="step-item"><div class="step-dot">3</div><p>Ülesannete kirjapanek — aitab kõiki vajalikke asju meeles pidada</p></li>
+        </ul>
+      </div>
+
+      <div class="detail-section" style="margin-bottom:20px;">
+        <h3>💚 Mõtteviis</h3>
+        <ul class="step-list" style="margin-top:8px;">
+          <li class="step-item"><div class="step-dot">1</div><p>Vastutus iseenda ees</p></li>
+          <li class="step-item"><div class="step-dot">2</div><p>Õppimine läbi praktilise katsetamise</p></li>
+          <li class="step-item"><div class="step-dot">3</div><p>Areng üle perfektsuse</p></li>
+        </ul>
+      </div>
+
+      <div class="tool-section-title" style="padding:0;margin-bottom:10px;">Takistused ja lahendused</div>
+
+      <div class="meetod-card orange" style="margin-bottom:10px;">
+        <div class="meetod-top">
+          <span class="meetod-emoji">😩</span>
+          <h3>Prokrastineerimine</h3>
+          <span class="badge badge-orange">Takistus</span>
+        </div>
+        <p>Lükkad asju edasi, kuigi tead, et peaksid alustama. Kasuta 2-minuti reeglit. Kui ülesanne võtab alla 2 minuti, tee see kohe ära. Suurema ülesande puhul alusta 5 minutiga. Sageli pisab sellest, et hoog sisse saada.</p>
+      </div>
+
+      <div class="meetod-card blue" style="margin-bottom:10px;">
+        <div class="meetod-top">
+          <span class="meetod-emoji">😶</span>
+          <h3>Motivatsiooni puudumine</h3>
+          <span class="badge badge-blue">Takistus</span>
+        </div>
+        <p>Tuju pole, energia on madal, mäki ei käivita. Ära oota motivatsiooni — loo endale rutiin. Motivatsioon järgneb tegevusele, mitte vastupidi. Tee esimene samm ka siis, kui tuju pole.</p>
+      </div>
+
+      <div class="meetod-card green" style="margin-bottom:10px;">
+        <div class="meetod-top">
+          <span class="meetod-emoji">📚</span>
+          <h3>Liiga palju ülesandeid korraga</h3>
+          <span class="badge badge-green">Takistus</span>
+        </div>
+        <p>Kõik tundub oluline, ei tea millest alustada. Prioritiseeri — vali iga päev 1–3 kõige olulisemat ülesannet. Kõik muu on Sulle boonuseks.</p>
+      </div>
+
+      <div class="meetod-card pink" style="margin-bottom:10px;">
+        <div class="meetod-top">
+          <span class="meetod-emoji">😬</span>
+          <h3>Perfektsionism</h3>
+          <span class="badge badge-pink">Takistus</span>
+        </div>
+        <p>Ei alusta või ei lõpeta, sest mäkki pole piisavalt hea. Seadista endale standard — "tehtud on parem kui täiuslik". Esimene versioon ei pea olema lõplik.</p>
+      </div>
+
+      <div class="meetod-card blue" style="margin-bottom:10px;">
+        <div class="meetod-top">
+          <span class="meetod-emoji">🌀</span>
+          <h3>Keskendumisvõime kadumine</h3>
+          <span class="badge badge-blue">Takistus</span>
+        </div>
+        <p>Mõtted hajuvad, telefon häirib, fookus kaob. Eemalda end füüsiliselt. Jäta telefon endast kaugemale, teavitused välja. Kasuta Pomodoro tehnikat lühikeste fookusplokkide täitmiseks.</p>
+      </div>
+
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span><span class="nav-label">Avaleht</span></div>
+      <div class="nav-item" onclick="goTo('meetodid')"><span class="nav-icon">📋</span><span class="nav-label">Meetodid</span></div>
+      <div class="nav-item" onclick="goTo('tooriistad')"><span class="nav-icon">🔧</span><span class="nav-label">Tööriistad</span></div>
+      <div class="nav-item active" onclick="goTo('pohimotted')"><span class="nav-icon">💡</span><span class="nav-label">Põhimõtted</span></div>
+    </div>
+  </div>
+
+  <!-- DETAIL (Pomodoro) -->
+  <div class="screen" id="detail">
+    <button class="detail-back" onclick="goBack()">←</button>
+    <div class="detail-hero">
+      <div class="detail-tag">Fookuse meetod</div>
+      <div class="detail-title">Pomodoro tehnika</div>
+      <div class="detail-sub">25 minutit täielikku fookust, siis 5 minutit puhkust. Lihtne, aga mõjus.</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="timer-box">
+          <div class="timer-display" id="timer">25:00</div>
+          <div class="timer-label" id="timer-label">Fookuse aeg</div>
+        </div>
+        <div class="timer-controls">
+          <button class="timer-btn start" id="timer-start-btn" onclick="toggleTimer()">▶ Alusta</button>
+          <button class="timer-btn reset" onclick="resetTimer()">↺ Lähtesta</button>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h3>📋 Kuidas see töötab</h3>
+        <ul class="step-list">
+          <li class="step-item"><div class="step-dot">1</div><p>Vali üks ülesanne, millele keskenduda</p></li>
+          <li class="step-item"><div class="step-dot">2</div><p>Pane telefon kinni, sulge teavitused</p></li>
+          <li class="step-item"><div class="step-dot">3</div><p>Tööta 25 minutit ilma katkestusteta</p></li>
+          <li class="step-item"><div class="step-dot">4</div><p>Võta 5 minutit pausi — liigu, joo vett</p></li>
+          <li class="step-item"><div class="step-dot">5</div><p>Pärast 4 Pomodoro't võta 20 min paus</p></li>
+        </ul>
+      </div>
+      <div class="detail-section">
+        <h3>💡 Miks see toimib</h3>
+        <p>Pomodoro tehnika kasutab aju loomulikke tähelepanu tsükleid. Lühikesed, fokusseeritud plokid hoiavad aju kognitiivselt värskena ja vähendavad läbipõlemise riski.</p>
+      </div>
+      <button class="try-btn" onclick="goTo('meetodid')">Vaata teisi meetodeid →</button>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span><span class="nav-label">Avaleht</span></div>
+      <div class="nav-item active" onclick="goTo('meetodid')"><span class="nav-icon">📋</span><span class="nav-label">Meetodid</span></div>
+      <div class="nav-item" onclick="goTo('tooriistad')"><span class="nav-icon">🔧</span><span class="nav-label">Tööriistad</span></div>
+      <div class="nav-item" onclick="goTo('pohimotted')"><span class="nav-icon">💡</span><span class="nav-label">Põhimõtted</span></div>
+    </div>
+  </div>
+
+  <!-- Global fixed nav -->
+  <div id="global-nav">
+    <div class="nav-item" id="nav-home" onclick="goTo('home')"><span class="nav-icon">🏠</span><span class="nav-label">Avaleht</span></div>
+    <div class="nav-item" id="nav-meetodid" onclick="goTo('meetodid')"><span class="nav-icon">📋</span><span class="nav-label">Meetodid</span></div>
+    <div class="nav-item" id="nav-tooriistad" onclick="goTo('tooriistad')"><span class="nav-icon">🔧</span><span class="nav-label">Tööriistad</span></div>
+    <div class="nav-item" id="nav-pohimotted" onclick="goTo('pohimotted')"><span class="nav-icon">💡</span><span class="nav-label">Põhimõtted</span></div>
+  </div>
+
+</div><!-- /phone -->
+
+<div class="phone-info">
+  Kliki navigeerimiseks · <strong>Voog</strong> — Mõtteprotsesside juhtimine
+</div>
+</div><!-- /wrapper -->
+
+<script>
+let history = ['splash'];
+let current = 'splash';
+
+const navScreens = ['home', 'meetodid', 'tooriistad', 'pohimotted'];
+
+function updateNav(id) {
+  const nav = document.getElementById('global-nav');
+  // Hide nav on splash and detail screens
+  nav.style.display = (id === 'splash' || id === 'detail') ? 'none' : 'flex';
+  // Update active state
+  navScreens.forEach(s => {
+    const el = document.getElementById('nav-' + s);
+    if (el) el.classList.toggle('active', s === id);
+  });
+}
+
+function goTo(id) {
+  const prev = document.getElementById(current);
+  const next = document.getElementById(id);
+  prev.classList.remove('active');
+  prev.classList.add('slide-back');
+  setTimeout(() => prev.classList.remove('slide-back'), 400);
+  next.classList.add('active');
+  history.push(id);
+  current = id;
+  updateNav(id);
+}
+
+function goBack() {
+  if (history.length <= 1) return;
+  history.pop();
+  const prev = current;
+  current = history[history.length - 1];
+  document.getElementById(prev).classList.remove('active');
+  document.getElementById(current).classList.add('active');
+  updateNav(current);
+}
+
+// Init nav hidden on splash
+updateNav('splash');
+
+// Pomodoro timer
+let timerInterval = null;
+let timerSeconds = 25 * 60;
+let isWork = true;
+let running = false;
+
+function updateDisplay() {
+  const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+  const s = (timerSeconds % 60).toString().padStart(2, '0');
+  document.getElementById('timer').textContent = m + ':' + s;
+}
+
+function toggleTimer() {
+  if (running) {
+    clearInterval(timerInterval);
+    running = false;
+    document.getElementById('timer-start-btn').textContent = '▶ Jätka';
+  } else {
+    running = true;
+    document.getElementById('timer-start-btn').textContent = '⏸ Peata';
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval);
+        running = false;
+        isWork = !isWork;
+        timerSeconds = isWork ? 25 * 60 : 5 * 60;
+        document.getElementById('timer-label').textContent = isWork ? 'Fookuse aeg' : 'Paus — hinga!';
+        document.getElementById('timer-start-btn').textContent = '▶ Alusta';
+      }
+      updateDisplay();
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  running = false;
+  isWork = true;
+  timerSeconds = 25 * 60;
+  updateDisplay();
+  document.getElementById('timer-label').textContent = 'Fookuse aeg';
+  document.getElementById('timer-start-btn').textContent = '▶ Alusta';
+}
+
+// Filter pills
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
