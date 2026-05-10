@@ -505,22 +505,22 @@
     <div class="home-body">
       <div class="section-title">Kiired meetodid</div>
       <div class="quick-grid">
-        <div class="quick-card" onclick="goTo('detail')">
+        <div class="quick-card" onclick="openDetail('pomodoro')">
           <div class="quick-icon" style="background:#FFF3E0;">⏱️</div>
           <h3>Pomodoro</h3>
           <p>25 min töö, 5 min paus</p>
         </div>
-        <div class="quick-card" onclick="goTo('meetodid')">
+        <div class="quick-card" onclick="openDetail('2min')">
           <div class="quick-icon" style="background:#E8F5E9;">⚡</div>
           <h3>2 min reegel</h3>
           <p>Tee kohe ära</p>
         </div>
-        <div class="quick-card" onclick="goTo('meetodid')">
+        <div class="quick-card" onclick="openDetail('braindump')">
           <div class="quick-icon" style="background:var(--blue-soft);">🧠</div>
           <h3>Brain dump</h3>
           <p>Tühjenda pea paberile</p>
         </div>
-        <div class="quick-card" onclick="goTo('meetodid')">
+        <div class="quick-card" onclick="openDetail('progressi')">
           <div class="quick-icon" style="background:#FFE4E8;">📓</div>
           <h3>Progressi päevik</h3>
           <p>2–3 lauset päevas</p>
@@ -544,7 +544,7 @@
         </div>
         <div class="tip-arrow">›</div>
       </div>
-      <div class="tip-card" onclick="goTo('takistused')">
+      <div class="tip-card" onclick="goTo('pohimotted')">
         <div class="tip-num">🚧</div>
         <div>
           <h4>Takistused ja lahendused</h4>
@@ -579,7 +579,7 @@
       <!-- ALUSTAMINE -->
       <div style="font-size:11px;font-weight:600;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.06em;padding:4px 0 2px;">Kuidas projektiga alustada?</div>
 
-      <div class="meetod-card orange" onclick="goTo('detail')">
+      <div class="meetod-card orange" onclick="openDetail('2min')">
         <div class="meetod-top">
           <span class="meetod-emoji">⚡</span>
           <h3>2 minuti reegel</h3>
@@ -589,7 +589,7 @@
         <div class="meetod-tags"><span class="meetod-tag">Kiire algus</span><span class="meetod-tag">Prokrastineerimine</span></div>
       </div>
 
-      <div class="meetod-card orange">
+      <div class="meetod-card orange" onclick="openDetail('ajueelsoojendus')">
         <div class="meetod-top">
           <span class="meetod-emoji">🧠</span>
           <h3>Aju eelsoojendus</h3>
@@ -599,7 +599,7 @@
         <div class="meetod-tags"><span class="meetod-tag">Fookus</span><span class="meetod-tag">Inspiratsioon</span></div>
       </div>
 
-      <div class="meetod-card orange">
+      <div class="meetod-card orange" onclick="openDetail('keskkond')">
         <div class="meetod-top">
           <span class="meetod-emoji">🏠</span>
           <h3>Vaheta keskkonda</h3>
@@ -612,7 +612,7 @@
       <!-- JÄTKAMINE -->
       <div style="font-size:11px;font-weight:600;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.06em;padding:12px 0 2px;">Kuidas projektiga jätkata?</div>
 
-      <div class="meetod-card blue" onclick="goTo('detail')">
+      <div class="meetod-card blue" onclick="openDetail('pomodoro')">
         <div class="meetod-top">
           <span class="meetod-emoji">⏱️</span>
           <h3>Pomodoro tehnika</h3>
@@ -622,7 +622,7 @@
         <div class="meetod-tags"><span class="meetod-tag">25 min</span><span class="meetod-tag">Produktiivsus</span></div>
       </div>
 
-      <div class="meetod-card blue">
+      <div class="meetod-card blue" onclick="openDetail('progressi')">
         <div class="meetod-top">
           <span class="meetod-emoji">📓</span>
           <h3>Progressi päevik</h3>
@@ -632,7 +632,7 @@
         <div class="meetod-tags"><span class="meetod-tag">Igapäevane</span><span class="meetod-tag">Refleksioon</span></div>
       </div>
 
-      <div class="meetod-card blue">
+      <div class="meetod-card blue" onclick="openDetail('toorezim')">
         <div class="meetod-top">
           <span class="meetod-emoji">🔄</span>
           <h3>Muuda tööreziimi</h3>
@@ -645,7 +645,7 @@
       <!-- LÕPETAMINE -->
       <div style="font-size:11px;font-weight:600;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.06em;padding:12px 0 2px;">Kuidas projekte lõpuni viia?</div>
 
-      <div class="meetod-card green">
+      <div class="meetod-card green" onclick="openDetail('retrospektiiv')">
         <div class="meetod-top">
           <span class="meetod-emoji">🔍</span>
           <h3>Mini retrospektiiv</h3>
@@ -655,7 +655,7 @@
         <div class="meetod-tags"><span class="meetod-tag">Refleksioon</span><span class="meetod-tag">Areng</span></div>
       </div>
 
-      <div class="meetod-card green">
+      <div class="meetod-card green" onclick="openDetail('tahistamine')">
         <div class="meetod-top">
           <span class="meetod-emoji">🏆</span>
           <h3>Tähistamise rituaal</h3>
@@ -665,7 +665,7 @@
         <div class="meetod-tags"><span class="meetod-tag">Motivatsioon</span><span class="meetod-tag">Lõpetamine</span></div>
       </div>
 
-      <div class="meetod-card pink">
+      <div class="meetod-card pink" onclick="openDetail('perfektsionism')">
         <div class="meetod-top">
           <span class="meetod-emoji">😤</span>
           <h3>Perfektsionism tapab</h3>
@@ -874,47 +874,15 @@
     </div>
   </div>
 
-  <!-- DETAIL (Pomodoro) -->
+  <!-- DETAIL (dynamic) -->
   <div class="screen" id="detail">
     <button class="detail-back" onclick="goBack()">←</button>
-    <div class="detail-hero">
-      <div class="detail-tag">Fookuse meetod</div>
-      <div class="detail-title">Pomodoro tehnika</div>
-      <div class="detail-sub">25 minutit täielikku fookust, siis 5 minutit puhkust. Lihtne, aga mõjus.</div>
+    <div class="detail-hero" id="detail-hero">
+      <div class="detail-tag" id="detail-tag"></div>
+      <div class="detail-title" id="detail-title"></div>
+      <div class="detail-sub" id="detail-sub"></div>
     </div>
-    <div class="detail-body">
-      <div class="detail-section">
-        <div class="timer-box">
-          <div class="timer-display" id="timer">25:00</div>
-          <div class="timer-label" id="timer-label">Fookuse aeg</div>
-        </div>
-        <div class="timer-controls">
-          <button class="timer-btn start" id="timer-start-btn" onclick="toggleTimer()">▶ Alusta</button>
-          <button class="timer-btn reset" onclick="resetTimer()">↺ Lähtesta</button>
-        </div>
-      </div>
-      <div class="detail-section">
-        <h3>📋 Kuidas see töötab</h3>
-        <ul class="step-list">
-          <li class="step-item"><div class="step-dot">1</div><p>Vali üks ülesanne, millele keskenduda</p></li>
-          <li class="step-item"><div class="step-dot">2</div><p>Pane telefon kinni, sulge teavitused</p></li>
-          <li class="step-item"><div class="step-dot">3</div><p>Tööta 25 minutit ilma katkestusteta</p></li>
-          <li class="step-item"><div class="step-dot">4</div><p>Võta 5 minutit pausi — liigu, joo vett</p></li>
-          <li class="step-item"><div class="step-dot">5</div><p>Pärast 4 Pomodoro't võta 20 min paus</p></li>
-        </ul>
-      </div>
-      <div class="detail-section">
-        <h3>💡 Miks see toimib</h3>
-        <p>Pomodoro tehnika kasutab aju loomulikke tähelepanu tsükleid. Lühikesed, fokusseeritud plokid hoiavad aju kognitiivselt värskena ja vähendavad läbipõlemise riski.</p>
-      </div>
-      <button class="try-btn" onclick="goTo('meetodid')">Vaata teisi meetodeid →</button>
-    </div>
-    <div class="bottom-nav">
-      <div class="nav-item" onclick="goTo('home')"><span class="nav-icon">🏠</span><span class="nav-label">Avaleht</span></div>
-      <div class="nav-item active" onclick="goTo('meetodid')"><span class="nav-icon">📋</span><span class="nav-label">Meetodid</span></div>
-      <div class="nav-item" onclick="goTo('tooriistad')"><span class="nav-icon">🔧</span><span class="nav-label">Tööriistad</span></div>
-      <div class="nav-item" onclick="goTo('pohimotted')"><span class="nav-icon">💡</span><span class="nav-label">Põhimõtted</span></div>
-    </div>
+    <div class="detail-body" id="detail-body"></div>
   </div>
 
   <!-- Global fixed nav -->
@@ -935,20 +903,84 @@
 <script>
 let history = ['splash'];
 let current = 'splash';
-
 const navScreens = ['home', 'meetodid', 'tooriistad', 'pohimotted'];
 
+// ===== MEETOD DATA =====
+const meetodid = {
+  pomodoro: {
+    tag: 'Jätkamine', emoji: '⏱️', title: 'Pomodoro tehnika',
+    sub: '25 minutit täielikku fookust, siis 5 minutit puhkust. Lihtne, aga mõjus.',
+    hasTimer: true,
+    miks: 'Pomodoro tehnika kasutab aju loomulikke tähelepanu tsükleid. Lühikesed, fokusseeritud plokid hoiavad aju kognitiivselt värskena ja vähendavad läbipõlemise riski.',
+    sammud: ['Vali üks ülesanne, millele keskenduda','Pane telefon kinni, sulge teavitused','Tööta 25 minutit ilma katkestusteta','Võta 5 minutit pausi — liigu, joo vett','Pärast 4 Pomodoro\'t võta 20 min paus']
+  },
+  '2min': {
+    tag: 'Alustamine', emoji: '⚡', title: '2 minuti reegel',
+    sub: 'Kõige lihtsam viis prokrastineerimisest üle saada.',
+    miks: 'Aju põhiprobleem on alustamine, mitte tegutsemine. 2 minuti reegel eemaldab sisemine takistus, andes loa alustada väikeselt.',
+    sammud: ['Küsi endalt: kas see võtab alla 2 minuti?','Kui jah — tee kohe ära, ära mõtle','Kui kauem — alusta ainult 2-minutise versiooniga','Kirjuta esimene lause, ava fail, joonista esimene joon','Eesmärk ei ole lõpetada, vaid käivitada']
+  },
+  braindump: {
+    tag: 'Alustamine', emoji: '🧠', title: 'Brain dump',
+    sub: 'Tühjenda pea kõigest, mis seal askeldab.',
+    miks: 'Kui peas on liiga palju mõtteid korraga, ei suuda aju ühele asjale keskenduda. Brain dump vabastab töömälu ja annab selguse.',
+    sammud: ['Võta tühi leht või ava uus dokument','Kirjuta kõik peast välja — ideed, mured, ülesanded','Ära filtreeri ega hinda, lihtsalt kirjuta','Kui leht on täis, vaata üle','Vali kõige olulisem ja alusta sellega']
+  },
+  progressi: {
+    tag: 'Jätkamine', emoji: '📓', title: 'Progressi päevik',
+    sub: 'Iga tööpäeva lõpus 2–3 lauset — nii püsid motiveeritud.',
+    miks: 'Uuringud näitavad, et progressi tajumine on üks tugevamatest sisemise motivatsiooni allikaist. Päevik aitab seda progressi näha, isegi väikeste sammude puhul.',
+    sammud: ['Ava päevik iga päeva lõpus','Kirjuta: mis töötas täna hästi?','Kirjuta: mis ei töötanud?','Kirjuta: mida teen homme teisiti?','Hoia kirjed lühikesed — 2-3 lauset piisab']
+  },
+  ajueelsoojendus: {
+    tag: 'Alustamine', emoji: '🧠', title: 'Aju eelsoojendus',
+    sub: 'Enne peamist ülesannet soojenda aju kergemaga.',
+    miks: 'Aju vajab aega fookusrežiimi lülitumiseks. Eelsoojendus vähendab "käivitamistakistust" ja lülitab sind vajalikusse mõtterežiimi.',
+    sammud: ['Vali 10–15 minutit kergemat tegevust','Loe artikleid, vaata inspiratsiooni, kuula muusikat','Vali midagi, mis on seotud su põhiülesandega','Ära hakka põhiasjaga kohe peale','Kui aju tundub soojem — alusta']
+  },
+  keskkond: {
+    tag: 'Alustamine', emoji: '🏠', title: 'Vaheta keskkonda',
+    sub: 'Uus koht annab vaimsele uue alguse.',
+    miks: 'Aju seob kohti ja tegevusi — magamistuba seostub une ja puhkusega, mitte tööga. Uus keskkond katkestab vanad mustrid.',
+    sammud: ['Tuvasta, kus töötamine ei toimi','Vali alternatiiv: kohvik, raamatukogu, välisõhk','Mine uude kohta ja alusta kohe','Ära too vana rutiin kaasa (nt sotsiaalmeediat)','Proovi erinevaid kohti ja leia oma lemmik']
+  },
+  toorezim: {
+    tag: 'Jätkamine', emoji: '🔄', title: 'Muuda tööreziimi',
+    sub: 'Kui üks tee ei toimi, proovi teist.',
+    miks: 'Probleemile erineval viisil lähenemine aktiveerib aju erinevaid piirkondi ja avab uusi lahendusi, mida samas rutiinis ei näeks.',
+    sammud: ['Märka, et praegune meetod ei toimi','Küsi: millises formaadis saaksin sama asja teha?','Proovi: digitaalne → käsitsi, kirjutamine → joonistamine','Selgita idee suuliselt, häälesvesta ennast','Jätka uues formaadis seni, kuni hoog tuleb']
+  },
+  retrospektiiv: {
+    tag: 'Lõpetamine', emoji: '🔍', title: 'Mini retrospektiiv',
+    sub: 'Pärast projekti lõpetamist — 20 minutit, 3 küsimust.',
+    miks: 'Retrospektiiv muudab kogemuse teadmiseks. Ilma selleta teeme samu vigu uuesti, kuna ei peatunud, et õppida.',
+    sammud: ['Pärast projekti lõpetamist võta 20 minutit','Küsi: mis töötas hästi?','Küsi: mis ei töötanud?','Küsi: mida teen järgmises projektis teisiti?','Kirjuta vastused üles ja hoia käepärast']
+  },
+  tahistamine: {
+    tag: 'Lõpetamine', emoji: '🏆', title: 'Tähistamise rituaal',
+    sub: 'Otsusta ette, mida teed kui projekt on valmis.',
+    miks: 'Tähistamine muudab lõpetamise sündmuseks, mille poole liikuda — mitte ainult kohustuse täitmiseks. See tugevdab lõpetamise harjumust.',
+    sammud: ['Enne projekti algust otsusta: kuidas tähistad?','Vali midagi konkreetset — kohv, õhtusöök, päev puhkust','Ära muuda latti lõpetamise hetkel','Kui projekt on valmis — tee see tähistus ära','Pea lubadust iseendale']
+  },
+  perfektsionism: {
+    tag: 'Lõpetamine', emoji: '😤', title: 'Perfektsionism tapab',
+    sub: '"Tehtud on alati parem kui tegemata täiulik töö."',
+    miks: 'Perfektsionism ei ole kõrgete standardite märk — see on hirmu märk. Hea piisab ei tähenda madalat kvaliteeti.',
+    sammud: ['Seadista endale konkreetne valmimise tähtaeg','Defineeri: mis on "piisavalt hea" selle töö jaoks?','Tee töö valmis selle standardi järgi','Peatu seal, ära otsi lisavõimalusi parandada','Esimene versioon EI pea olema lõplik']
+  }
+};
+
+// ===== NAV =====
 function updateNav(id) {
   const nav = document.getElementById('global-nav');
-  // Hide nav on splash and detail screens
   nav.style.display = (id === 'splash' || id === 'detail') ? 'none' : 'flex';
-  // Update active state
   navScreens.forEach(s => {
     const el = document.getElementById('nav-' + s);
     if (el) el.classList.toggle('active', s === id);
   });
 }
 
+// ===== NAVIGATION =====
 function goTo(id) {
   const prev = document.getElementById(current);
   const next = document.getElementById(id);
@@ -959,6 +991,7 @@ function goTo(id) {
   history.push(id);
   current = id;
   updateNav(id);
+  if (id === 'detail') { document.getElementById('detail').scrollTop = 0; }
 }
 
 function goBack() {
@@ -969,31 +1002,69 @@ function goBack() {
   document.getElementById(prev).classList.remove('active');
   document.getElementById(current).classList.add('active');
   updateNav(current);
+  resetTimer();
 }
 
-// Init nav hidden on splash
+// ===== OPEN DETAIL =====
+function openDetail(key) {
+  const m = meetodid[key];
+  if (!m) return;
+  document.getElementById('detail-tag').textContent = m.tag;
+  document.getElementById('detail-title').textContent = m.emoji + ' ' + m.title;
+  document.getElementById('detail-sub').textContent = m.sub;
+
+  let body = '';
+  if (m.hasTimer) {
+    body += `<div class="detail-section">
+      <div class="timer-box">
+        <div class="timer-display" id="timer">25:00</div>
+        <div class="timer-label" id="timer-label">Fookuse aeg</div>
+      </div>
+      <div class="timer-controls">
+        <button class="timer-btn start" id="timer-start-btn" onclick="toggleTimer()">▶ Alusta</button>
+        <button class="timer-btn reset" onclick="resetTimer()">↺ Lähtesta</button>
+      </div>
+    </div>`;
+    resetTimer();
+  }
+  body += `<div class="detail-section"><h3>📋 Sammud</h3><ul class="step-list">`;
+  m.sammud.forEach((s, i) => {
+    body += `<li class="step-item"><div class="step-dot">${i+1}</div><p>${s}</p></li>`;
+  });
+  body += `</ul></div>`;
+  body += `<div class="detail-section"><h3>💡 Miks see toimib</h3><p>${m.miks}</p></div>`;
+  body += `<button class="try-btn" onclick="goBack()">← Tagasi meetoditele</button>`;
+
+  document.getElementById('detail-body').innerHTML = body;
+  goTo('detail');
+}
+
 updateNav('splash');
 
-// Pomodoro timer
+// ===== TIMER =====
 let timerInterval = null;
 let timerSeconds = 25 * 60;
 let isWork = true;
 let running = false;
 
 function updateDisplay() {
+  const el = document.getElementById('timer');
+  if (!el) return;
   const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
   const s = (timerSeconds % 60).toString().padStart(2, '0');
-  document.getElementById('timer').textContent = m + ':' + s;
+  el.textContent = m + ':' + s;
 }
 
 function toggleTimer() {
   if (running) {
     clearInterval(timerInterval);
     running = false;
-    document.getElementById('timer-start-btn').textContent = '▶ Jätka';
+    const btn = document.getElementById('timer-start-btn');
+    if (btn) btn.textContent = '▶ Jätka';
   } else {
     running = true;
-    document.getElementById('timer-start-btn').textContent = '⏸ Peata';
+    const btn = document.getElementById('timer-start-btn');
+    if (btn) btn.textContent = '⏸ Peata';
     timerInterval = setInterval(() => {
       timerSeconds--;
       if (timerSeconds <= 0) {
@@ -1001,8 +1072,10 @@ function toggleTimer() {
         running = false;
         isWork = !isWork;
         timerSeconds = isWork ? 25 * 60 : 5 * 60;
-        document.getElementById('timer-label').textContent = isWork ? 'Fookuse aeg' : 'Paus — hinga!';
-        document.getElementById('timer-start-btn').textContent = '▶ Alusta';
+        const lbl = document.getElementById('timer-label');
+        const btn2 = document.getElementById('timer-start-btn');
+        if (lbl) lbl.textContent = isWork ? 'Fookuse aeg' : 'Paus — hinga!';
+        if (btn2) btn2.textContent = '▶ Alusta';
       }
       updateDisplay();
     }, 1000);
@@ -1015,15 +1088,40 @@ function resetTimer() {
   isWork = true;
   timerSeconds = 25 * 60;
   updateDisplay();
-  document.getElementById('timer-label').textContent = 'Fookuse aeg';
-  document.getElementById('timer-start-btn').textContent = '▶ Alusta';
+  const lbl = document.getElementById('timer-label');
+  const btn = document.getElementById('timer-start-btn');
+  if (lbl) lbl.textContent = 'Fookuse aeg';
+  if (btn) btn.textContent = '▶ Alusta';
 }
 
-// Filter pills
+// ===== FILTER =====
+const filterMap = {
+  'Kõik': null,
+  'Alustamine': 'Alustamine',
+  'Jätkamine': 'Jätkamine',
+  'Lõpetamine': 'Lõpetamine'
+};
+
 document.querySelectorAll('.filter-pill').forEach(pill => {
   pill.addEventListener('click', function() {
     document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
     this.classList.add('active');
+    const filter = filterMap[this.textContent.trim()];
+    // Show/hide cards
+    document.querySelectorAll('.meetod-card').forEach(card => {
+      const badge = card.querySelector('.badge');
+      if (!filter || (badge && badge.textContent.trim() === filter)) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    // Show/hide section labels
+    document.querySelectorAll('.meetodid-list > div[style*="uppercase"]').forEach(label => {
+      if (!filter) { label.style.display = ''; return; }
+      const map = {'Alustamine':'ALUSTADA','Jätkamine':'JÄTKATA','Lõpetamine':'LÕPUNI'};
+      label.style.display = label.textContent.includes(map[filter]) ? '' : 'none';
+    });
   });
 });
 </script>
